@@ -1,57 +1,55 @@
-from schemas.user_schema import User, Create_User, Login_User, Update_User
-from database.database import db, add_user
 from typing import List, Optional
+from schemas.user_schema import User, Create_User, Login_User, Update_User
 
-# In-memory user ID counter
+# In-memory user database and ID counter
+user_db = {}
 user_id_counter = 1
+
+# Helper function to generate the next user ID
+def generate_user_id() -> int:
+    global user_id_counter
+    current_id = user_id_counter
+    user_id_counter += 1
+    return current_id
 
 # Get all users
 def get_all_users() -> List[User]:
-    return list(db["users"].values())
+    return list(user_db.values())
 
 # Get a user by ID
-def get_user_by_id(user_id: int) -> User:
-    return db["users"].get(user_id, {"error": "User not found"})
+def get_user_by_id(user_id: int) -> Optional[User]:
+    return user_db.get(user_id)
 
 # Create a new user
-def create_user(user: Create_User) -> User:
-    global user_id_counter
-    new_user = {"id": user_id_counter, **user.dict()}
-    add_user(
-        user_id=user_id_counter,
-        name=user.name,
-        email=user.email,
-        is_active=user.is_active,
-    )
-    user_id_counter += 1
+def create_user(user_data: Create_User) -> User:
+    user_id = generate_user_id()
+    new_user = User(id=user_id, **user_data.dict())
+    user_db[user_id] = new_user
     return new_user
 
 # Update a user
-def update_user(user_id: int, user_data: Update_User) -> dict:
-    existing_user = db["users"].get(user_id)
+def update_user(user_id: int, user_data: Update_User) -> Optional[User]:
+    existing_user = user_db.get(user_id)
     if not existing_user:
-        return {"error": "User not found"}
-    
-    # Only update fields that are provided
+        return None
+
+    # Update only provided fields
     updated_data = user_data.dict(exclude_unset=True)
-    existing_user.update(updated_data)
-    
-    # Ensure that the updated data is saved back to the database
-    db["users"][user_id] = existing_user
+    for key, value in updated_data.items():
+        setattr(existing_user, key, value)
     return existing_user
 
 # Delete a user
-def delete_user(user_id: int) -> dict:
-    if user_id in db["users"]:
-        del db["users"][user_id]
-        return {"message": "User deleted successfully"}
-    return {"error": "User not found"}
+def delete_user(user_id: int) -> bool:
+    if user_id in user_db:
+        del user_db[user_id]
+        return True
+    return False
 
 # Login user
-def login_user(login_data: Login_User) -> dict:
-    # Check if user exists based on the provided login credentials (name and email)
-    for user in db["users"].values():
-        if user["email"] == login_data.email and user["name"] == login_data.name:
-            user["is_active"] = True  # Mark the user as active
-            return {"message": "Login successful", "user_id": user["id"]}
-    return {"error": "Invalid login credentials"}
+def login_user(login_data: Login_User) -> Optional[User]:
+    for user in user_db.values():
+        if user.email == login_data.email and user.name == login_data.name:
+            user.is_active = True  # Mark the user as active
+            return user
+    return None

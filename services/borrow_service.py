@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from schemas.borrow_book_schema import BorrowModel, BorrowRecord
 from memory_db.books_db import books  # Import books in-memory database
+from memory_db.users_db import users  
 
 from datetime import datetime
 from typing import List
@@ -10,6 +11,13 @@ borrow_records: dict[int, BorrowRecord] = {}
 
 # Borrow a book logic
 def borrow_book(borrow_data: BorrowModel):
+    # Validate user existence
+    user = users.get(borrow_data.user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="User account is inactive")
+
     # Check if book exists and is available
     book = books.get(borrow_data.book_id)
     if not book:
@@ -32,6 +40,11 @@ def borrow_book(borrow_data: BorrowModel):
 
 # Return a borrowed book logic
 def return_book(borrow_data: BorrowModel):
+    # Validate user existence
+    user = users.get(borrow_data.user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     # Find the borrow record for the book and user
     borrow_record = next((record for record in borrow_records.values()
                          if record.user_id == borrow_data.user_id and record.book_id == borrow_data.book_id), None)
@@ -51,6 +64,11 @@ def return_book(borrow_data: BorrowModel):
 
 # View borrowing records for a specific user
 def get_borrow_records_by_user(user_id: int) -> List[BorrowRecord]:
+    # Validate user existence
+    user = users.get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
     # Return all records for the given user
     records = [record for record in borrow_records.values() if record.user_id == user_id]
     return records

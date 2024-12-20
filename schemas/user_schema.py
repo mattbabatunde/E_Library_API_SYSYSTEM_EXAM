@@ -1,6 +1,8 @@
 from pydantic import BaseModel, EmailStr
+from uuid import UUID
 from datetime import datetime
 from typing import Optional
+
 
 # Base model for a user
 class UserModel(BaseModel):
@@ -10,7 +12,8 @@ class UserModel(BaseModel):
 
 # Model for user with ID
 class User(UserModel):
-    id: int
+    id: UUID
+
 
 # Model for creating a new user
 class Create_User(UserModel):
