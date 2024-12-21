@@ -35,4 +35,4 @@ class Update_User(BaseModel):
     is_active: Optional[bool] = None
 
 # Users dictionary (use ID as the key, instead of name)
-users: dict[int, User] = {}
+users: dict[UUID, User] = {}

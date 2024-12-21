@@ -1,19 +1,18 @@
 from pydantic import BaseModel
 from datetime import datetime
-from schemas.book_schema import books  
-from memory_db.books_db import *
+from typing import Optional
 from uuid import UUID
 
 
+# BorrowModel for user input
 class BorrowModel(BaseModel):
-    id: UUID
-    user_id: int
-    book_id: int 
-    borrow_date: datetime = datetime.now() 
-    return_date: datetime = None 
+    user_id: UUID  # UUID for user
+    book_id: int  # ID of the book
+    borrow_date: Optional[datetime] = None  
+    return_date: Optional[datetime] = None 
 
+
+# BorrowRecord for storing borrow records
 class BorrowRecord(BorrowModel):
-    id: UUID
-
-
-borrow_records: dict[int, BorrowRecord] = {} 
+    id: int  
+  

@@ -1,34 +1,31 @@
 from typing import List, Optional
-from schemas.user_schema import User, Create_User, Login_User, Update_User
+from uuid import uuid4, UUID
+from schemas.user_schema import User, Create_User, Login_User, Update_User 
 
-# In-memory user database and ID counter
+# In-memory user database
 user_db = {}
-user_id_counter = 1
 
-# Helper function to generate the next user ID
-def generate_user_id() -> int:
-    global user_id_counter
-    current_id = user_id_counter
-    user_id_counter += 1
-    return current_id
+# Helper function to generate the next user ID (UUID)
+def generate_user_id() -> str:
+    return str(uuid4())  # Convert the UUID to a string before returning it
 
 # Get all users
 def get_all_users() -> List[User]:
     return list(user_db.values())
 
 # Get a user by ID
-def get_user_by_id(user_id: int) -> Optional[User]:
+def get_user_by_id(user_id: str) -> Optional[User]:  # Expecting a string for user_id now
     return user_db.get(user_id)
 
 # Create a new user
 def create_user(user_data: Create_User) -> User:
-    user_id = generate_user_id()
+    user_id = generate_user_id()  # Generate a string ID for the user
     new_user = User(id=user_id, **user_data.dict())
     user_db[user_id] = new_user
     return new_user
 
 # Update a user
-def update_user(user_id: int, user_data: Update_User) -> Optional[User]:
+def update_user(user_id: str, user_data: Update_User) -> Optional[User]:  # Expecting a string for user_id now
     existing_user = user_db.get(user_id)
     if not existing_user:
         return None
@@ -40,7 +37,7 @@ def update_user(user_id: int, user_data: Update_User) -> Optional[User]:
     return existing_user
 
 # Delete a user
-def delete_user(user_id: int) -> bool:
+def delete_user(user_id: str) -> bool:  # Expecting a string for user_id now
     if user_id in user_db:
         del user_db[user_id]
         return True

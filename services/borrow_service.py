@@ -1,78 +1,116 @@
 from fastapi import HTTPException
-from schemas.borrow_book_schema import BorrowModel, BorrowRecord
-from memory_db.books_db import books  # Import books in-memory database
-from memory_db.users_db import users  
-
 from datetime import datetime
+from uuid import UUID
+from schemas.borrow_book_schema import BorrowModel, BorrowRecord
 from typing import List
 
-# Global dictionaries for borrow records
-borrow_records: dict[int, BorrowRecord] = {}
 
-# Borrow a book logic
+
+# In-memory database for borrowing records
+borrow_records: dict[int, BorrowRecord] = {
+    1: BorrowRecord(
+        id=1,
+        user_id=UUID("3fa85f64-5717-4562-b3fc-2c963f66afa6"),  # Example UUID for a sample user
+        book_id=1,  
+        borrow_date=datetime.now(),  # Current datetime when the record is created
+        return_date=None  # Indicates the book has not been returned yet
+    )
+}
+
+# Mock user database with UUIDs and activity status
+users = {
+    UUID("3fa85f64-5717-4562-b3fc-2c963f66afa6"): {
+        "id": UUID("3fa85f64-5717-4562-b3fc-2c963f66afa6"),  # User's unique identifier
+        "is_active": True  # Indicates if the user is active
+    },
+    UUID("7fa85f64-5717-4562-b3fc-2c963f66afb7"): {
+        "id": UUID("7fa85f64-5717-4562-b3fc-2c963f66afb7"),
+        "is_active": True
+    },
+    UUID("8fa85f64-5717-4562-b3fc-2c963f66afc8"): {
+        "id": UUID("8fa85f64-5717-4562-b3fc-2c963f66afc8"),
+        "is_active": False
+    },
+    UUID("9fa85f64-5717-4562-b3fc-2c963f66afd9"): {
+        "id": UUID("9fa85f64-5717-4562-b3fc-2c963f66afd9"),
+        "is_active": True
+    },
+    UUID("2fa85f64-5717-4562-b3fc-2c963f66afe2"): {
+        "id": UUID("2fa85f64-5717-4562-b3fc-2c963f66afe2"),
+        "is_active": False
+    }
+}
+
+# Mock book database with availability status
+books = {
+    1: {"id": 1, "title": "The Great Gatsby", "is_available": False},  # Book is already borrowed
+    2: {"id": 2, "title": "Star boy", "is_available": True},  # Available for borrowing
+    3: {"id": 3, "title": "The Great Gatsby", "is_available": False},  # Another borrowed copy
+    4: {"id": 4, "title": "Jingle bell", "is_available": True},  # Available for borrowing
+    5: {"id": 5, "title": "Magic house", "is_available": False},  # Book is already borrowed
+    6: {"id": 6, "title": "Killer Mike", "is_available": True},  # Available for borrowing
+}
+
+# Borrow a book
 def borrow_book(borrow_data: BorrowModel):
-    # Validate user existence
+    # Validate user
     user = users.get(borrow_data.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    if not user.is_active:
+    if not user["is_active"]:
         raise HTTPException(status_code=400, detail="User account is inactive")
 
-    # Check if book exists and is available
+    # Validate book
     book = books.get(borrow_data.book_id)
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
-    if not book.is_available:
-        raise HTTPException(status_code=400, detail="Book is not available")
+    if not book["is_available"]:
+        raise HTTPException(status_code=400, detail="Book is currently unavailable")
 
-    # Borrow the book
-    book.is_available = False
+    # Create a new borrow record
+    book["is_available"] = False
     borrow_id = len(borrow_records) + 1
     borrow_record = BorrowRecord(
         id=borrow_id,
         user_id=borrow_data.user_id,
         book_id=borrow_data.book_id,
-        borrow_date=borrow_data.borrow_date or datetime.now(),
+        borrow_date=borrow_data.borrow_date or datetime.now()
     )
     borrow_records[borrow_id] = borrow_record
 
     return {"message": "Book borrowed successfully", "borrow_record": borrow_record}
 
-# Return a borrowed book logic
+
+
 def return_book(borrow_data: BorrowModel):
-    # Validate user existence
+    # Validate user
     user = users.get(borrow_data.user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Find the borrow record for the book and user
-    borrow_record = next((record for record in borrow_records.values()
-                         if record.user_id == borrow_data.user_id and record.book_id == borrow_data.book_id), None)
 
+    borrow_record = next(
+        (record for record in borrow_records.values()
+         if record.user_id == borrow_data.user_id and record.book_id == borrow_data.book_id),
+        None
+    )
     if not borrow_record:
         raise HTTPException(status_code=404, detail="No borrow record found for this book and user")
-    
-    # Update the return date in the borrow record
-    borrow_record.return_date = borrow_data.borrow_date or datetime.now()
-    
-    # Mark the book as available again
+
+
+    borrow_record.return_date = borrow_data.return_date or datetime.now()
     book = books.get(borrow_data.book_id)
     if book:
-        book.is_available = True
+        book["is_available"] = True
 
     return {"message": "Book returned successfully", "borrow_record": borrow_record}
 
-# View borrowing records for a specific user
-def get_borrow_records_by_user(user_id: int) -> List[BorrowRecord]:
-    # Validate user existence
-    user = users.get(user_id)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
 
-    # Return all records for the given user
-    records = [record for record in borrow_records.values() if record.user_id == user_id]
-    return records
+def get_borrow_records_by_user(user_id: UUID) -> List[BorrowRecord]:
+    return [record for record in borrow_records.values() if record.user_id == user_id]
 
-# View all borrow records
-def get_all_borrow_records() -> List[BorrowRecord]:
-    return list(borrow_records.values())
+
+
+
+def get_all_borrow_records():
+    return borrow_records
