@@ -6,7 +6,7 @@ from typing import Optional
 
 # Base model for a user
 class UserModel(BaseModel):
-    name: str
+    name: str 
     email: EmailStr
     is_active: bool = True
 

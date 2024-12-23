@@ -10,5 +10,5 @@ app.include_router(borrow_record.borrow_router, prefix="/borrow_records", tags=[
 
 
 @app.get("/")
-def root():
+def Home():
     return {"message": "Welcome to the E-Library API System!"}

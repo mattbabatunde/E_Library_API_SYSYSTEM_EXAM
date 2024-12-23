@@ -4,6 +4,7 @@ from schemas.book_schema import Book, Create_Book, Update_Book
 # In-memory storage for books
 book_db = {}
 
+
 # Helper function to generate the next book ID (this is a very simple approach for demo purposes)
 def generate_book_id() -> int:
     return len(book_db) + 1
