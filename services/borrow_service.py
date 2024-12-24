@@ -112,5 +112,5 @@ def get_borrow_records_by_user(user_id: UUID) -> List[BorrowRecord]:
 
 
 
-# def get_all_borrow_records():
-#     return borrow_records
+def get_all_borrow_records():
+    return borrow_records

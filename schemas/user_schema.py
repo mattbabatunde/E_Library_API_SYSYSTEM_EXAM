@@ -36,3 +36,6 @@ class Update_User(BaseModel):
 
 # Users dictionary (use ID as the key, instead of name)
 users: dict[UUID, User] = {}
+
+
+
