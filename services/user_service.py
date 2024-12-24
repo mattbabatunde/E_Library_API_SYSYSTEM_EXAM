@@ -4,10 +4,10 @@ from schemas.user_schema import User, Create_User, Login_User, Update_User
 
 # In-memory user database with fake user data
 user_db = {
-    str(uuid4()): User(id=str(uuid4()), name="John Doe", email="johndoe@example.com", password="password123", is_active=False),
-    str(uuid4()): User(id=str(uuid4()), name="Jane Smith", email="janesmith@example.com", password="mypassword456", is_active=False),
-    str(uuid4()): User(id=str(uuid4()), name="Alice Brown", email="alicebrown@example.com", password="alice1234", is_active=False),
-    str(uuid4()): User(id=str(uuid4()), name="Bob Johnson", email="bobjohnson@example.com", password="bobpassword789", is_active=False)
+    str(uuid4()): User(id=str(uuid4()), name="John Doe", email="johndoe@example.com",  is_active=False),
+    str(uuid4()): User(id=str(uuid4()), name="Jane Smith", email="janesmith@example.com",  is_active=False),
+    str(uuid4()): User(id=str(uuid4()), name="Alice Brown", email="alicebrown@example.com",  is_active=False),
+    str(uuid4()): User(id=str(uuid4()), name="Bob Johnson", email="bobjohnson@example.com",  is_active=False)
 }
 
 
