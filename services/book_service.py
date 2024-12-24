@@ -92,3 +92,31 @@ try:
     print(f"Book '{updated_book.title}' updated successfully.")
 except HTTPException as e:
     print(f"Error: {e.detail}")
+
+# Example usage for deactivating a book (marking as unavailable)
+book_to_deactivate = 2  # Assuming book ID 2 exists
+try:
+    deactivated_book = mark_book_unavailable(book_to_deactivate)
+    print(f"Book '{deactivated_book.title}' is now unavailable.")
+except HTTPException as e:
+    print(f"Error: {e.detail}")
+
+# Example usage for deleting a book
+book_to_delete = 1  # Assuming book ID 1 exists
+try:
+    deletion_result = delete_book(book_to_delete)
+    if deletion_result:
+        print(f"Book with ID {book_to_delete} deleted successfully.")
+except HTTPException as e:
+    print(f"Error: {e.detail}")
+
+# Example to get all books
+all_books = get_all_books()
+print("All Books:", all_books)
+
+# Example to get a book by ID
+book_by_id = get_book_by_id(3)
+if book_by_id:
+    print(f"Book Found: {book_by_id.title}")
+else:
+    print("Book not found.")
