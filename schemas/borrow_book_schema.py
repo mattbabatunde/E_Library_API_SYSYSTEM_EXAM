@@ -15,4 +15,3 @@ class BorrowModel(BaseModel):
 # BorrowRecord for storing borrow records
 class BorrowRecord(BorrowModel):
     id: int  
-  
