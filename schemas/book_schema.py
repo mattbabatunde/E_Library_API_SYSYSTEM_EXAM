@@ -25,5 +25,5 @@ class Update_Book(BookModel):
     is_available: Optional[bool] = None  # Allow partial updates for availability
 
 
-# In-memory storage for books, now using UUID as the key
-books: dict[int, Book] = {}
+
+

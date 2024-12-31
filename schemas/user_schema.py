@@ -35,7 +35,10 @@ class Update_User(BaseModel):
     is_active: Optional[bool] = None
 
 
-users: dict[UUID, User] = {}
+
+
+
+
 
 
 
